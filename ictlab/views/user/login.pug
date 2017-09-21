@@ -1,0 +1,34 @@
+extends ../layout
+
+
+mixin selectItem(itemName)
+    option(value=itemName )= itemName
+
+block content
+    script(type="application/javascript").
+        function login() {
+
+            var email = $("#email")[0].value;
+            var password = $("#password")[0].value;
+        
+            if (!(email && password)) {
+                alert("Provided incorrect information.");
+                return;
+            } else {
+                $.post("http://localhost:3001/userapi/login", {
+                    "email": email,
+                    "password": password},
+                    () => window.location = "/")
+                .fail( (jq,text,reason) => {alert(jq.responseText);});
+            }
+        }
+
+    div
+        form
+            table
+                +TableRow('Email')
+                    input(id="email",type="email", placeholder="someone@example.com")
+                +TableRow('Password')
+                    input(id="password",type="password", placeholder="password")
+                +TableRow('')
+                    input(type="button", value="submit", onclick="login()")

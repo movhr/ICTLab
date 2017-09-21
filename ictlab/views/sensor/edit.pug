@@ -1,0 +1,238 @@
+extends ../layout.pug
+
+mixin Tr1(nid,sid, classname)
+    tr(id='n'+nid+"s"+sid,class=classname)
+
+mixin BuildTableFromInstances(instances)
+    - var objArr = [];
+    - var maxID = -1;
+    each x in instances
+        - let numNID = Number(x.NodeID); 
+        if numNID > maxID
+            - objArr.push([]);
+            - maxID = numNID;
+        else
+            - objArr[maxID-1].push(x);
+    - var i = 0
+    while i < maxID
+        if i == 0
+            each k in objArr[i][0]
+                - objKeys.push(k);
+            table(class='table table-bordered table-condensed')
+                tr
+                    th(id='n'+objArr[i][0].NodeID, colspan=(objKeys.length-3))
+                        button(onclick="edit(this" + objArr[i][0].NodeID + ")", class='btn btn-primary btn-xs')=Edit
+                        div="- NodeID: "
+                        span=objArr[i][0].NodeID
+                        div="- Node Name: "
+                        span=objArr[i][0].NodeName
+                        div="- Enabled:"
+                        span=objArr[i][0].NodeEnable
+                    
+                        tr
+                            each k,v in objArr[0][0]
+                                unless ignoredHeaders.includes(k)
+                                    th=k
+                                
+                        each arrayElement in objArr[i]
+                            if arrayElement.SensorEnabled == "0"
+                                Tr(arrayElement.NodeID,arrayElement.SensorID,'active')
+                            else 
+                                case arrayElement.Status
+                                    when "Intermittent Failures"
+                                        Tr(arrayElement.NodeID,arrayElement.SensorID,'warning')
+                                    when "Inactive"
+                                        Tr(arrayElement.NodeID,arrayElement.SensorID,'danger')
+                                    default
+                                        Tr(arrayElement.NodeID,arrayElement.SensorID,'success')
+                            td
+                                button(onclick="edit(this," + arrayElement.NodeID + ',' + arrayElement.SensorID + ')', class='btn btn-primary btn-xs')=Edit
+                            each k,v in arrayElement
+                                unless ignoredHeaders.includes(k)
+                                    td
+                                        span=v
+                    
+        - i++
+
+block content
+    
+    #content
+    
+    script.
+        var objKeys = ['editButton'];
+        var pad = (s, size) => s.length < size ? pad('0'.concat(s),size) : s;
+        var colorstyle = (color) => " style='border: 2px solid #" + pad(Number(color).toString(16), 6) + "' ";
+        const ignoredHeaders = ['NodeID', 'NodeName', 'NodeEnabled', 'Color'];
+        const editableHeaders = ['NodeName', 'NodeEnabled', 'SensorName', 'SensorEnabled', 'Loc_x', 'Loc_y', 'Loc_z', 'Description', 'Type'];
+
+        function unlockInputBox(tdElement) 
+        {
+            let spantext = tdElement.innerText;
+            let newElement = document.createElement("input");
+            newElement.className = 'input-sm';
+            newElement.value = spantext;
+            tdElement.replaceChild(newElement, tdElement.children[0])
+        }
+
+        function lockInputBox(tdElement) {
+            let spantext = tdElement.children[0].value;
+            let newElement = document.createElement("span");
+            newElement.textContent = spantext;
+            tdElement.replaceChild(newElement, tdElement.children[0]);
+        }
+
+        function edit(button, nodeID, sensorID) {
+            // Change view according to sensor info
+            var target = undefined;
+            if(sensorID && nodeID) 
+                target = document.getElementById('n'+nodeID+'s'+sensorID);
+            // Change view according to node info
+            else if(nodeID)
+                target = document.getElementById('n'+nodeID);
+            else{
+                alert("Something went wrong.");
+                return;
+            }
+            $.each(target.children, (i,x) => {if (x.children.length > 0 && x.children[0].tagName === "SPAN") unlockInputBox(x);});
+            button.className = "btn btn-success btn-xs";
+            button.textContent = "confirm";
+            button.onclick = () => confirm(button,nodeID, sensorID);
+        }
+
+        function confirm(button,nodeID, sensorID) {
+            let newVals = [];
+            var target = undefined;
+            if(sensorID && nodeID) 
+                target = document.getElementById('n'+nodeID+'s'+sensorID);
+            else if(nodeID)
+                target = document.getElementById('n'+nodeID);
+            else{
+                alert("Something went wrong.");
+                return;
+            }
+            $.each(target.children, (i,x) => 
+            {
+                if (x.children.length > 0 && x.children[0].tagName === "INPUT") 
+                {
+                    console.log(x.children[0]); 
+                    newVals.push(x.children[0].value);
+                }
+            });
+            var sentData = {
+                sensorID : sensorID,
+                nodeID : nodeID,
+                newName : newVals[0],
+                newEnabled : newVals[1],
+                newX : newVals[2],
+                newY : newVals[3],
+                newZ : newVals[4],
+                newDesc : newVals[5],
+                newType : newVals[6]
+            };
+            $.post("http://api2.localhost:3001/edit", sentData, (result) => {
+                //let button = arguments.callee.caller;
+                var target = undefined;
+                if(sensorID && nodeID) 
+                    target = document.getElementById('n'+nodeID+'s'+sensorID);
+                else if(nodeID)
+                    target = document.getElementById('n'+nodeID);
+                else{
+                    alert("Something went wrong.");
+                    return;
+                }
+                $.each(target.children, (i,x) => {if (x.children.length > 0 && x.children[0].tagName === "INPUT") lockInputBox(x);});
+                button.className = "btn btn-primary btn-xs";
+                button.textContent = "edit";
+                button.onclick = () => edit(button,nodeID, sensorID);
+                alert("Update was successful.");
+            }).fail( jq => alert(jq.responseText));
+        }
+    
+    
+    //-     $(document).ready( () =>
+    //-             $.get("http://api2.localhost:3001/getinstances", (instances) => {
+    //-                 if(!instances){
+    //-                     alert("Error while fetching data.");
+    //-                     return;
+    //-                 }else
+    //- +BuildTableFromInstances(instances)
+    
+    //- script.
+    //-     let x = 0;
+    //-             })
+    //-     );
+
+    
+    script.
+        $(document).ready( () => {
+            $.get("http://api2.localhost:3001/getinstances", (instances) => {
+                var content = $("#content"); 
+                var objArr = []; //2D Matrix
+                var maxID = -1;
+                $.each(instances, (i,x) =>  {
+                    if((Number(x.NodeID) > maxID)){
+                        objArr.push([]);
+                        maxID = Number(x.NodeID);
+                    }else{
+                        objArr[maxID-1].push(x);
+                    }
+                });
+                var tablehead = "";
+                for(let i = 0; i < maxID-1; i++){
+                    var str = "";
+                    if(i === 0)
+                        $.each(objArr[i][0], (k,v) => objKeys.push(k));
+                    // Build table head
+                    str += ("<table class='table table-bordered table-condensed'><tr>");
+                    
+                    // creates a link to edit node
+                    str += ("<th id='n" + objArr[i][0].NodeID + "' colspan='" + (objKeys.length-3) + 
+                            "'><button onclick='edit(this," + objArr[i][0].NodeID +
+                            ");' class='btn btn-primary btn-xs'>edit</button>");
+                    
+                    // displays node info
+                    str += (" Node ID: <span>" + objArr[i][0].NodeID + 
+                    '</span> - ' + "Node Name: <span>" + objArr[i][0].NodeName + 
+                    '</span> - ' + "Enabled: <span>" + objArr[i][0].NodeEnabled + 
+                    "</span></th>");
+                    // add rest of properties that must be included
+                    str += ("</tr><tr><th></th>");
+                    $.each(objArr[0][0], (k,v) => {
+                        str += ignoredHeaders.includes(k) ? "" : ("<th>" + k + "</th>");
+                    });
+                    str += ("</tr><tbody>");
+                    
+                    // Build table rows
+                    $.each(objArr[i], (arrayIndex, arrayElement) =>{
+                        // check sensor status and set info accordingly
+                        let trPrefix = ("<tr id='n" + arrayElement.NodeID + 's' + arrayElement.SensorID + "' ");
+                        if(arrayElement.SensorEnabled === '0')
+                            str += (trPrefix + "class='active'>");
+                        else if(arrayElement.Status === "Inactive")
+                            str += (trPrefix + "class='danger'>");
+                        else if(arrayElement.Status === "Intermittent Failures")
+                            str += (trPrefix + "class='warning'>");
+                        else
+                            str += (trPrefix + "class='success'>");
+
+                        // create a link to sensor editing    
+                        str += ("<td><button onclick='edit(this," + arrayElement.NodeID + ',' + 
+                                arrayElement.SensorID + ");' class='btn btn-primary btn-xs'>edit</button></td>");
+                        
+                        // add rest of property values that are included
+                        $.each(arrayElement, (k,v) => {
+                            if(!ignoredHeaders.includes(k)) {
+                                str += "<td>";
+                                str += editableHeaders.includes(k) ? "<span>" + v + "</span>" : v;
+                                str += "</td>";
+                            }
+                        });
+                        str += ("</tr>");
+                    });
+                    
+                    // Finish up and append table to document
+                    str += ("</tbody></table><br/>");
+                    content.append(str);
+                };
+            });
+        });

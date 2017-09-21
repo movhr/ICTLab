@@ -1,0 +1,38 @@
+extends ../layout
+
+
+block content
+    script(type="application/javascript").
+        function register() {
+
+            var email = $("#email")[0].value;
+            var password = $("#password")[0].value;
+            var role = $("#role")[0].value;
+        
+            if (!(email && password && role)) {
+                alert("Provided incorrect information.");
+                return;
+            } else {
+                $.post("http://localhost:3001/userapi/register", {
+                    "email": email,
+                    "password": password,
+                    "role": role},
+                    (() => window.location="/user/login" ))
+                .fail( (jq,text,reason) => alert(jq.responseText));
+            }
+        }
+
+    div
+        form
+            table
+                +TableRow('Email')
+                    input(id="email",type="email", placeholder="someone@example.com")
+                +TableRow('Password')
+                    input(id="password", type="password", placeholder="password")
+                +TableRow('Role')
+                    select(id="role")
+                        +selectItem('Visitor')
+                        +selectItem('Data Scientist')
+                        +selectItem('Sensor Admin')
+                +TableRow('')
+                    input(type="button", value="submit", onclick="register()")

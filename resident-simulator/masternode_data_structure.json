@@ -1,0 +1,16 @@
+{
+  "time":string,
+  "building_name": string,
+  "rooms": [
+    {
+      "room_name" : string,
+      "assets": [
+        {
+          "name":string,
+          "property_name":property_float,
+          ...
+        },
+        ...
+      ]
+    }
+}

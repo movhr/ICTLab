@@ -1,0 +1,48 @@
+
+
+mixin TableRow(rowName)
+    tr
+        td
+            p=rowName
+        td
+            block
+
+mixin selectItem(itemName, isSelected)
+    option(value=itemName selected=isSelected)= itemName
+    
+html
+    head
+        title=role
+    body
+        script(type="application/javascript", src="https://code.jquery.com/jquery-3.2.1.js")
+        script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js",integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa",crossorigin="anonymous")
+        nav(class="navbar navbar-default")
+            div(class="container-fluid")
+              div(class="navbar-header")
+                a(class="navbar-brand" href="/")="Metrico"
+              ul(class="nav navbar-nav")
+                li
+                  a(href="/")="Home"
+                li(class="dropdown")
+                  a(class="dropdown-toggle" data-toggle="dropdown" href="#")="Sensor"
+                    span(class="caret")
+                  ul(class='dropdown-menu')
+                    li
+                      a(href="/sensor/register")="Register"
+                    li
+                      a(href="/sensor/edit")="Edit"
+                li(class="dropdown")
+                  a(class="dropdown-toggle" data-toggle="dropdown" href="#")="User"
+                    span(class="caret")
+                  ul(class='dropdown-menu')
+                      li
+                          a(href="/user/register")="Register"
+                      li
+                          a(href="/user/login")="Login"
+                li
+                  a(href="http://localhost:3000/")="Expert"
+        block content
+
+    p &#169 Metrico 2017;
+    link(rel="stylesheet",href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css",integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u",crossorigin="anonymous")
+    

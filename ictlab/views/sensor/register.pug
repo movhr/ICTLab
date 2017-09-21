@@ -1,0 +1,69 @@
+extends ../layout
+
+
+block content
+    table
+        +TableRow('Sensor name')
+            input(id='sensor_name', type='text', placeholder='Sensor name')
+        +TableRow('Device type')
+            select(id='device')
+                +selectItem('Sensor', true)
+                +selectItem('Node')
+        +TableRow('Parent')
+            select(id='parent')
+        +TableRow('Location')
+            input(id='loc_x', type='text')
+            input(id='loc_y', type='text')
+            input(id='loc_z', type='text')
+        +TableRow('Sensor type')
+            select(id='type')
+        +TableRow('Desciption')
+            textarea(id='description')
+        +TableRow('')
+            button(onclick='register()')='Submit'
+
+    h2 Information
+    h4 Type
+    p A node is a device that is connected to one or more sensor to send their data to the server. It can be used to virtually group sensors.
+    p A Sensor is a device that collects metric data and optionally sends it to the server.
+    h4 Location
+    p The location is the combination of coordinates in the simulator. 
+    p The location thus depends on scale.
+    p Note: the example building size is (4,7.5,3.5).
+    p To make this more realistic and user friendly, use your own model.
+    script.
+        $(document).ready(function(){
+            $.getJSON("http://api2.localhost:3001/getnodes", (data) =>{
+                $.each(data, (i, item) =>    
+                    $('#parent').append($('<option>', {
+                        value:item.Name,
+                        text:item.Name
+                    })));
+                });
+
+            $.getJSON("http://api2.localhost:3001/gettypes", (data) =>{
+                $.each(data, (i,item) =>
+                    $('#type').append($('<option>', {
+                        value:item.Description,
+                        text:item.Description
+                    })));
+            });
+        });
+
+        function register(){
+            var data = {
+                device: $('#device').val(),
+                name: $('#sensor_name').val(),
+                type: $('#type').val(),
+                parent: $('#parent').val(),
+                loc_x: $('#loc_x').val(),
+                loc_y: $('#loc_y').val(),
+                loc_z: $('#loc_z').val(),
+                description: $('#description').val()
+            };
+
+            if(data.device && data.name && data.type && data.parent && data.loc_x && data.loc_y && data.loc_z && data.description)
+                $.post("http://api2.localhost:3001/register", data, function(res) { alert("Sensor successfully added. Please verify a sensor with the following token: " + res)}).fail( function(jq,text,reason) { alert(jq.responseText)});
+            else
+                alert('Incorrect input');
+        }

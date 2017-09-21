@@ -1,0 +1,42 @@
+{
+  "name": "smart-insights",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon api2/api2.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/movhr/ictlab.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/movhr/ictlab/issues"
+  },
+  "homepage": "https://github.com/movhr/ictlab#readme",
+  "dependencies": {
+    "body-parser": "^1.17.1",
+    "cookie-parser": "^1.4.3",
+    "cors": "^2.8.3",
+    "express": "^4.15.2",
+    "express-basic-auth": "^1.0.2",
+    "express-http-proxy": "^1.0.3",
+    "fs": "0.0.1-security",
+    "http": "0.0.0",
+    "http-proxy": "^1.16.2",
+    "https": "^1.0.0",
+    "influx": "^5.0.6",
+    "mariasql": "^0.2.6",
+    "node-influx": "^1.0.2",
+    "pug": "^2.0.0-beta11",
+    "socket.io": "^2.0.2",
+    "tls": "0.0.1",
+    "vhost": "^3.0.2"
+  },
+  "devDependencies": {
+    "nodemon": "^1.11.0"
+  }
+}
