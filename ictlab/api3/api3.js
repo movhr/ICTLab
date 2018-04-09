@@ -69,7 +69,7 @@ app.get("/gethistorics", function (req, res) {
 });
 
 app.get("/getsimsample", function(req, res) {
-    const path = "/home/max/Projects/ictlab/sample_historics_new.json";
+    const path = "/home/user/Projects/ictlab/sample_historics_new.json";
     res.sendFile(path);
 });
 
